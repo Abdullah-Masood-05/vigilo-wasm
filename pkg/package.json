@@ -1,0 +1,16 @@
+{
+  "name": "vigilo-wasm",
+  "collaborators": [
+    "Abdullah Masood"
+  ],
+  "description": "High-performance WebAssembly proctoring stream fusion and behavioral engine in pure Rust for Bun, Node.js, and Browsers.",
+  "version": "0.2.0",
+  "license": "AGPL-3.0-only",
+  "files": [
+    "vigilo_wasm_bg.wasm",
+    "vigilo_wasm.js",
+    "vigilo_wasm.d.ts"
+  ],
+  "main": "vigilo_wasm.js",
+  "types": "vigilo_wasm.d.ts"
+}
