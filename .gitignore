@@ -3,3 +3,10 @@ node_modules/
 .bun/
 dist/
 *.log
+.npmrc
+
+# 14 MB of ONNX graphs; `bun run models` copies them from the vigilo-core
+# checkout. A second committed copy would go stale the first time one is
+# re-exported, with nothing to say which the thresholds were tuned against.
+demo/models/
+*.tgz

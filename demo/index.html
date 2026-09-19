@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>vigilo-wasm — in-browser proctoring</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0e1116;
+        --panel: #161b22;
+        --line: #232b36;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --ok: #3fb950;
+        --warn: #d29922;
+        --bad: #f85149;
+        --accent: #58a6ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+
+      header {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 20px;
+        padding: 20px 24px 40px;
+        align-items: start;
+      }
+
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      .stage {
+        position: relative;
+        background: #000;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+      }
+
+      .stage video,
+      .stage canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      /* Mirrored, because an unmirrored selfie view makes people correct the
+         wrong way when they try to centre themselves. The overlay is mirrored
+         with it so the boxes stay on the faces. */
+      .stage video,
+      .stage canvas {
+        transform: scaleX(-1);
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+      }
+
+      .panel h2 {
+        margin: 0 0 10px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 3px 0;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .row span:first-child {
+        color: var(--muted);
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        font: inherit;
+        font-weight: 500;
+        padding: 7px 14px;
+        border-radius: 7px;
+        border: 1px solid var(--line);
+        background: #21262d;
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      button:hover:not(:disabled) {
+        border-color: var(--accent);
+      }
+
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #06121f;
+      }
+
+      #status {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        margin-bottom: 14px;
+        font-size: 13px;
+      }
+
+      #status.error {
+        border-color: var(--bad);
+        color: var(--bad);
+      }
+
+      .violations:empty::after {
+        content: "none";
+        color: var(--ok);
+      }
+
+      .violation {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 6px 9px;
+        border-radius: 6px;
+        background: rgba(248, 81, 73, 0.12);
+        border-left: 3px solid var(--bad);
+        margin-bottom: 5px;
+      }
+
+      .log {
+        max-height: 220px;
+        overflow-y: auto;
+        font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+        font-size: 12px;
+      }
+
+      .log div {
+        padding: 2px 0;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+      }
+
+      .log .started {
+        color: var(--bad);
+      }
+
+      .log .ended {
+        color: var(--ok);
+      }
+
+      .log .degraded {
+        color: var(--warn);
+      }
+
+      label.opt {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 3px 0;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>vigilo-wasm</h1>
+      <p>
+        YuNet · head pose · gaze · YOLOX-Nano, running entirely in this tab.
+        No frame leaves your machine.
+      </p>
+    </header>
+
+    <main>
+      <div>
+        <div id="status">Idle. Press Start to request the camera.</div>
+        <div class="stage">
+          <video id="video" playsinline muted></video>
+          <canvas id="overlay"></canvas>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>Session</h2>
+          <div class="controls">
+            <button id="start" class="primary">Start</button>
+            <button id="stop" disabled>Stop</button>
+          </div>
+          <div style="margin-top: 10px">
+            <label class="opt">
+              <input type="checkbox" id="webgpu" />
+              Try WebGPU first (falls back to wasm)
+            </label>
+            <label class="opt">
+              <input type="checkbox" id="objects" checked />
+              Prohibited-object detection (YOLOX, 1 Hz)
+            </label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Active violations</h2>
+          <div class="violations" id="violations"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Signals</h2>
+          <div class="row"><span>faces</span><span id="s-faces">—</span></div>
+          <div class="row"><span>head yaw / pitch</span><span id="s-pose">—</span></div>
+          <div class="row"><span>gaze yaw / pitch</span><span id="s-gaze">—</span></div>
+          <div class="row"><span>eye-in-head</span><span id="s-eye">—</span></div>
+          <div class="row"><span>direction</span><span id="s-dir">—</span></div>
+          <div class="row"><span>objects</span><span id="s-objects">—</span></div>
+        </div>
+
+        <div class="panel">
+          <h2>Coverage</h2>
+          <div class="row"><span>face</span><span id="c-face">—</span></div>
+          <div class="row"><span>pose</span><span id="c-pose">—</span></div>
+          <div class="row"><span>gaze</span><span id="c-gaze">—</span></div>
+          <div class="row"><span>objects</span><span id="c-objects">—</span></div>
+          <div class="row"><span>identity</span><span id="c-identity">—</span></div>
+        </div>
+
+        <div class="panel">
+          <h2>Latency</h2>
+          <div class="row"><span>loop fps</span><span id="l-fps">—</span></div>
+          <div class="row"><span>frame p50 / p95</span><span id="l-total">—</span></div>
+          <div class="row"><span>face</span><span id="l-face">—</span></div>
+          <div class="row"><span>pose</span><span id="l-pose">—</span></div>
+          <div class="row"><span>gaze</span><span id="l-gaze">—</span></div>
+          <div class="row"><span>objects</span><span id="l-objects">—</span></div>
+        </div>
+
+        <div class="panel">
+          <h2>Event log</h2>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
