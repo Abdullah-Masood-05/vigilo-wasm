@@ -1,0 +1,60 @@
+{
+  "name": "vigilo-wasm",
+  "version": "0.2.0",
+  "description": "High-performance WebAssembly proctoring stream fusion and behavioral engine in pure Rust for Bun, Node.js, and Browsers.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./wasm": {
+      "import": "./pkg/vigilo_wasm.js",
+      "types": "./pkg/vigilo_wasm.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "pkg",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:wasm": "wasm-pack build --target bundler --out-dir pkg",
+    "build:wasm:web": "wasm-pack build --target web --out-dir pkg-web",
+    "build:wasm:node": "wasm-pack build --target nodejs --out-dir pkg-node",
+    "build:ts": "bun build ts/index.ts --outdir dist --target node && bun x tsc -p tsconfig.build.json",
+    "build": "bun run build:wasm && bun run build:ts",
+    "test": "bun test",
+    "typecheck": "bun x tsc --noEmit"
+  },
+  "keywords": [
+    "proctoring",
+    "exam-integrity",
+    "stream-fusion",
+    "webassembly",
+    "wasm",
+    "rust",
+    "bun",
+    "behavior-analysis",
+    "gaze-tracking",
+    "head-pose",
+    "ai-safety"
+  ],
+  "author": "Abdullah Masood",
+  "license": "AGPL-3.0-only",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  }
+}
