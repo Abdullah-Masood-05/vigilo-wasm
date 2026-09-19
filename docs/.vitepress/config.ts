@@ -122,8 +122,23 @@ export default withMermaid(
     },
     mermaid: {
       theme: 'base',
+      // SVG <text> labels instead of HTML in <foreignObject>: mermaid then measures
+      // the text it actually renders, so nothing wraps out of its box or gets clipped
+      // by the surrounding VitePress typography. This has to be the top-level key --
+      // mermaid 11 reads `config.htmlLabels ?? config.flowchart.htmlLabels ?? true`,
+      // so the (deprecated) flowchart one never wins against the default.
+      htmlLabels: false,
+      flowchart: {
+        padding: 14,
+        nodeSpacing: 45,
+        rankSpacing: 60,
+        subGraphTitleMargin: { top: 6, bottom: 14 },
+        useMaxWidth: true,
+      },
       themeVariables: {
         darkMode: true,
+        fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, sans-serif',
+        fontSize: '14px',
         background: '#0f1117',
         primaryColor: '#1a1e29',
         primaryBorderColor: '#363d4f',
@@ -132,6 +147,8 @@ export default withMermaid(
         tertiaryColor: '#12151e',
         lineColor: '#9ca3af',
         textColor: '#d1d5db',
+        nodeTextColor: '#f3f4f6',
+        titleColor: '#f3f4f6',
         clusterBkg: '#12151e',
         clusterBorder: '#2d3444',
         edgeLabelBackground: '#1a1e29',
