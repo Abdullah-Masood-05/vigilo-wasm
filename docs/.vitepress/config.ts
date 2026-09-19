@@ -21,7 +21,33 @@ export default withMermaid(
             'In-browser exam proctoring: YuNet, head pose, gaze, prohibited objects and temporal fusion in WebAssembly & WebGPU.',
         },
       ],
+      ['meta', { property: 'og:type', content: 'website' }],
+      ['meta', { property: 'og:url', content: 'https://abdullah-masood-05.github.io/vigilo-wasm/' }],
+      // Absolute URL: crawlers resolve og:image against their own origin, not the page.
+      [
+        'meta',
+        {
+          property: 'og:image',
+          content: 'https://abdullah-masood-05.github.io/vigilo-wasm/og-image.png',
+        },
+      ],
+      ['meta', { property: 'og:image:width', content: '2400' }],
+      ['meta', { property: 'og:image:height', content: '1260' }],
+      [
+        'meta',
+        {
+          property: 'og:image:alt',
+          content: 'Vigilo WASM documentation: in-browser AI exam proctoring',
+        },
+      ],
       ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+      [
+        'meta',
+        {
+          name: 'twitter:image',
+          content: 'https://abdullah-masood-05.github.io/vigilo-wasm/og-image.png',
+        },
+      ],
     ],
     appearance: 'dark',
     themeConfig: {
