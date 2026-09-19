@@ -6,26 +6,26 @@ It ports the battle-tested Rust [`vigilo-core`](https://github.com/Abdullah-Maso
 
 ```mermaid
 graph TD
-    subgraph Browser ["Client Browser Tab · Zero Network Leakage"]
-        Cam["getUserMedia 1280x720"] --> Canvas["Canvas · willReadFrequently"]
+    subgraph Browser ["Client Browser Tab — Zero Network Leakage"]
+        Cam["getUserMedia<br/>1280x720"] --> Canvas["Canvas 2D<br/>willReadFrequently"]
         Canvas --> RGBA["RGBA Byte Buffer"]
 
-        subgraph WASM1 ["vigilo-wasm · Rust/Wasm"]
-            Pre["Letterbox, Crop + NCHW Pack"]
+        subgraph WASM1 ["vigilo-wasm"]
+            Pre["Letterbox, Crop<br/>+ NCHW Pack"]
         end
 
         RGBA --> Pre
         Pre --> Tensor["Float32Array Tensors"]
 
         subgraph ORT ["onnxruntime-web"]
-            Inference["Neural Inference · WebGPU/SIMD"]
+            Inference["Neural Inference<br/>WebGPU / SIMD"]
         end
 
         Tensor --> Inference
         Inference --> Out["Raw Output Tensors"]
 
-        subgraph WASM2 ["vigilo-wasm · Rust/Wasm"]
-            Post["Anchor Decode, Keypoints + NMS"]
+        subgraph WASM2 ["vigilo-wasm"]
+            Post["Anchor Decode,<br/>Keypoints + NMS"]
             Gate["Gaze Gating Logic"]
             Fusion["Temporal Fusion Engine"]
         end
@@ -33,7 +33,7 @@ graph TD
         Out --> Post
         Post --> Gate
         Gate --> Fusion
-        Fusion --> Events["Violation Events + Signals"]
+        Fusion --> Events["Violation Events<br/>+ Signals"]
     end
 ```
 

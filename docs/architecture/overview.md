@@ -23,21 +23,21 @@ Transferring large image buffers between JavaScript and WebAssembly can easily b
 graph TD
     subgraph JS ["JavaScript / DOM"]
         Video["HTMLVideoElement"]
-        Canvas["Canvas · willReadFrequently"]
-        RGBA["ImageData · Uint8ClampedArray"]
+        Canvas["Canvas 2D<br/>willReadFrequently"]
+        RGBA["ImageData<br/>Uint8ClampedArray"]
         Video --> Canvas --> RGBA
     end
 
-    subgraph WASM ["WebAssembly · Rust Memory"]
+    subgraph WASM ["Rust / WebAssembly"]
         Buffer["Scratch Frame Buffer"]
         Pre["Letterbox + NCHW Pack"]
-        OutTensor["Float32Array Input Tensor"]
+        OutTensor["Float32Array<br/>Input Tensor"]
         Buffer --> Pre --> OutTensor
     end
 
-    subgraph ORT ["onnxruntime-web · WebGPU / SIMD"]
+    subgraph ORT ["onnxruntime-web"]
         GpuBuff["GPU Tensor Buffer"]
-        Kernel["Neural Inference"]
+        Kernel["Neural Inference<br/>WebGPU / SIMD"]
         GpuBuff --> Kernel
     end
 

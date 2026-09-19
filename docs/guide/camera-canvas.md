@@ -12,9 +12,9 @@ Natively, `vigilo-core` captures via DirectShow, V4L2, or AVFoundation. In the b
 graph LR
     Dev["Webcam Device"] --> Stream["MediaStream Track"]
     Stream --> Video["HTMLVideoElement"]
-    Video --> Ctx["Canvas 2D · willReadFrequently"]
-    Ctx --> Data["ImageData · RGBA 8-bit"]
-    Data --> Wasm["vigilo-wasm · Rust"]
+    Video --> Ctx["Canvas 2D<br/>willReadFrequently"]
+    Ctx --> Data["ImageData<br/>RGBA 8-bit"]
+    Data --> Wasm["vigilo-wasm<br/>Rust"]
 ```
 
 ---
