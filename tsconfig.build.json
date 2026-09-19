@@ -2,9 +2,17 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
+    // `dist/wasm.js` sits one level under the package root, exactly as
+    // `ts/wasm.ts` does, so its `../pkg/vigilo_wasm.js` import still resolves
+    // to the package root after compilation. Emitting to `dist/ts/` instead
+    // pushes every module one level deeper and sends that import to
+    // `dist/pkg/`, which does not exist — a failure that only shows up in an
+    // installed package, never in this repo.
     "rootDir": "./ts",
-    "emitDeclarationOnly": true,
-    "declaration": true
+    "declaration": true,
+    "declarationMap": true,
+    "types": []
   },
-  "include": ["ts/**/*"]
+  "include": ["ts/**/*"],
+  "exclude": ["tests/**/*"]
 }
