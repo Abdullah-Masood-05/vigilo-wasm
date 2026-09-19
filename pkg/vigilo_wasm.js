@@ -1,9 +1,461 @@
 /* @ts-self-types="./vigilo_wasm.d.ts" */
 
 /**
+ * A named bag of output tensors, so YuNet's twelve heads cross the boundary
+ * in one call instead of twelve positional arguments.
+ */
+export class TensorBag {
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        TensorBagFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_tensorbag_free(ptr, 0);
+    }
+    clear() {
+        wasm.tensorbag_clear(this.__wbg_ptr);
+    }
+    /**
+     * @param {string} name
+     * @returns {boolean}
+     */
+    has(name) {
+        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.tensorbag_has(this.__wbg_ptr, ptr0, len0);
+        return ret !== 0;
+    }
+    constructor() {
+        const ret = wasm.tensorbag_new();
+        this.__wbg_ptr = ret;
+        TensorBagFinalization.register(this, this.__wbg_ptr, this);
+        return this;
+    }
+    /**
+     * Store one output tensor under the name the graph gave it.
+     * @param {string} name
+     * @param {Float32Array} data
+     */
+    set(name, data) {
+        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArrayF32ToWasm0(data, wasm.__wbindgen_export);
+        const len1 = WASM_VECTOR_LEN;
+        wasm.tensorbag_set(this.__wbg_ptr, ptr0, len0, ptr1, len1);
+    }
+}
+if (Symbol.dispose) TensorBag.prototype[Symbol.dispose] = TensorBag.prototype.free;
+
+export class VigiloPipeline {
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        VigiloPipelineFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_vigilopipeline_free(ptr, 0);
+    }
+    /**
+     * Start a frame from tightly packed RGB8.
+     * @param {Uint8Array} rgb
+     * @param {number} width
+     * @param {number} height
+     */
+    beginFrameRgb(rgb, width, height) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passArray8ToWasm0(rgb, wasm.__wbindgen_export);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.vigilopipeline_beginFrameRgb(retptr, this.__wbg_ptr, ptr0, len0, width, height);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            if (r1) {
+                throw takeObject(r0);
+            }
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Start a frame from `getImageData` / `VideoFrame.copyTo` output (RGBA).
+     * @param {Uint8Array} rgba
+     * @param {number} width
+     * @param {number} height
+     */
+    beginFrame(rgba, width, height) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passArray8ToWasm0(rgba, wasm.__wbindgen_export);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.vigilopipeline_beginFrame(retptr, this.__wbg_ptr, ptr0, len0, width, height);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            if (r1) {
+                throw takeObject(r0);
+            }
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * The config in force, including every default that was filled in.
+     * @returns {any}
+     */
+    config() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_config(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Declare which optional models the host actually loaded.
+     *
+     * Call once, after session creation. A model that failed to download is
+     * not configured, and saying so keeps fusion from waiting on a signal
+     * that is never coming.
+     * @param {boolean} pose
+     * @param {boolean} gaze
+     * @param {boolean} objects
+     */
+    configureSlots(pose, gaze, objects) {
+        wasm.vigilopipeline_configureSlots(this.__wbg_ptr, pose, gaze, objects);
+    }
+    /**
+     * Decode YuNet's twelve heads into faces, sorted by score.
+     *
+     * Also settles what an empty result means for the two models downstream
+     * of it: with no face there is nothing to crop, so pose and gaze are
+     * *gated* skips rather than failures.
+     * @param {TensorBag} outputs
+     * @returns {any}
+     */
+    decodeFace(outputs) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            _assertClass(outputs, TensorBag);
+            wasm.vigilopipeline_decodeFace(retptr, this.__wbg_ptr, outputs.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Decode the two 90-bin heads, and difference against this frame's head
+     * pose to get eye-in-head.
+     *
+     * Eye-in-head is only meaningful because both terms describe the same
+     * instant, which is why pose must be decoded before gaze on a frame where
+     * both run — not merely at some nearby time.
+     * @param {Float32Array} yaw
+     * @param {Float32Array} pitch
+     * @returns {any}
+     */
+    decodeGaze(yaw, pitch) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passArrayF32ToWasm0(yaw, wasm.__wbindgen_export);
+            const len0 = WASM_VECTOR_LEN;
+            const ptr1 = passArrayF32ToWasm0(pitch, wasm.__wbindgen_export);
+            const len1 = WASM_VECTOR_LEN;
+            wasm.vigilopipeline_decodeGaze(retptr, this.__wbg_ptr, ptr0, len0, ptr1, len1);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Decode and suppress the `[1, 3549, 85]` grid, keeping allowlisted
+     * classes only.
+     * @param {Float32Array} output
+     * @returns {any}
+     */
+    decodeObjects(output) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passArrayF32ToWasm0(output, wasm.__wbindgen_export);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.vigilopipeline_decodeObjects(retptr, this.__wbg_ptr, ptr0, len0);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Decode the `rotation_matrix` output into yaw/pitch/roll degrees.
+     * @param {Float32Array} rotation_matrix
+     * @returns {any}
+     */
+    decodePose(rotation_matrix) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passArrayF32ToWasm0(rotation_matrix, wasm.__wbindgen_export);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.vigilopipeline_decodePose(retptr, this.__wbg_ptr, ptr0, len0);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Assemble this frame's [`Signals`], step fusion, and return both.
+     *
+     * `t_ms` is milliseconds since session start and must be monotonic. It is
+     * a parameter rather than a clock read for the same reason it is in the
+     * native engine: a recording replayed through this function must produce
+     * a byte-identical event sequence, and a function that reads the clock
+     * cannot promise that.
+     * @param {number} t_ms
+     * @returns {any}
+     */
+    endFrame(t_ms) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_endFrame(retptr, this.__wbg_ptr, t_ms);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * @returns {number}
+     */
+    faceCount() {
+        const ret = wasm.vigilopipeline_faceCount(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * YuNet input: `[1, 3, 640, 640]`, planar BGR, letterboxed top-left.
+     * @returns {Float32Array}
+     */
+    faceInput() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_faceInput(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            var r3 = getDataViewMemory0().getInt32(retptr + 4 * 3, true);
+            if (r3) {
+                throw takeObject(r2);
+            }
+            var v1 = getArrayF32FromWasm0(r0, r1).slice();
+            wasm.__wbindgen_export4(r0, r1 * 4, 4);
+            return v1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Close everything still open, as a session ends.
+     *
+     * Without this, a violation that was open when the tab closed never gets
+     * an end event and reads as zero-length in the report.
+     * @param {number} t_ms
+     * @returns {any}
+     */
+    finish(t_ms) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_finish(retptr, this.__wbg_ptr, t_ms);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Should gaze run on this frame? `null` means yes.
+     *
+     * Asking before preprocessing saves the 448x448 resize and the ~600 MFLOP
+     * inference behind it on every frame where the answer would have been
+     * noise. The side effect is recorded: a gated frame reports
+     * `SkippedGated` with the reason, not a missing signal.
+     * @returns {any}
+     */
+    gazeGate() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_gazeGate(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return takeObject(r0);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Gaze input: `[1, 3, 448, 448]`, planar RGB, ImageNet-normalized, over
+     * the tight face box with no expansion.
+     * @returns {Float32Array}
+     */
+    gazeInput() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_gazeInput(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            var r3 = getDataViewMemory0().getInt32(retptr + 4 * 3, true);
+            if (r3) {
+                throw takeObject(r2);
+            }
+            var v1 = getArrayF32FromWasm0(r0, r1).slice();
+            wasm.__wbindgen_export4(r0, r1 * 4, 4);
+            return v1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Record that a slot's model errored on this frame.
+     *
+     * Degrade, never die: one bad inference is not a reason to end an exam,
+     * but it must not be reported as a clean "nothing there" either.
+     * @param {string} slot
+     */
+    markFailed(slot) {
+        const ptr0 = passStringToWasm0(slot, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.vigilopipeline_markFailed(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+     * Build a pipeline from an optional TOML or JSON config string.
+     * @param {string | null} [config_str]
+     */
+    constructor(config_str) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            var ptr0 = isLikeNone(config_str) ? 0 : passStringToWasm0(config_str, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+            var len0 = WASM_VECTOR_LEN;
+            wasm.vigilopipeline_new(retptr, ptr0, len0);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            if (r2) {
+                throw takeObject(r1);
+            }
+            this.__wbg_ptr = r0;
+            VigiloPipelineFinalization.register(this, this.__wbg_ptr, this);
+            return this;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * YOLOX input: `[1, 3, 416, 416]`, planar BGR, padded with 114.
+     * @returns {Float32Array}
+     */
+    objectInput() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_objectInput(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            var r3 = getDataViewMemory0().getInt32(retptr + 4 * 3, true);
+            if (r3) {
+                throw takeObject(r2);
+            }
+            var v1 = getArrayF32FromWasm0(r0, r1).slice();
+            wasm.__wbindgen_export4(r0, r1 * 4, 4);
+            return v1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Head pose input: `[1, 3, 224, 224]`, planar RGB, ImageNet-normalized,
+     * cropped square around the **primary** face.
+     *
+     * The primary face is index 0, which is the highest-scoring box because
+     * NMS sorted them. With two people in shot that means pose describes the
+     * candidate, not whoever wandered past behind them.
+     * @returns {Float32Array}
+     */
+    poseInput() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.vigilopipeline_poseInput(retptr, this.__wbg_ptr);
+            var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+            var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+            var r2 = getDataViewMemory0().getInt32(retptr + 4 * 2, true);
+            var r3 = getDataViewMemory0().getInt32(retptr + 4 * 3, true);
+            if (r3) {
+                throw takeObject(r2);
+            }
+            var v1 = getArrayF32FromWasm0(r0, r1).slice();
+            wasm.__wbindgen_export4(r0, r1 * 4, 4);
+            return v1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+     * Drop all temporal state. Thresholds and loaded slots are kept.
+     */
+    reset() {
+        wasm.vigilopipeline_reset(this.__wbg_ptr);
+    }
+}
+if (Symbol.dispose) VigiloPipeline.prototype[Symbol.dispose] = VigiloPipeline.prototype.free;
+
+/**
  * WebAssembly wrapper for angular head pose and gaze direction tracking.
  */
-class WasmDirectionTracker {
+export class WasmDirectionTracker {
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
@@ -50,12 +502,11 @@ class WasmDirectionTracker {
     }
 }
 if (Symbol.dispose) WasmDirectionTracker.prototype[Symbol.dispose] = WasmDirectionTracker.prototype.free;
-exports.WasmDirectionTracker = WasmDirectionTracker;
 
 /**
  * WebAssembly wrapper for the deterministic temporal `FusionEngine`.
  */
-class WasmFusionEngine {
+export class WasmFusionEngine {
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
@@ -210,7 +661,6 @@ class WasmFusionEngine {
     }
 }
 if (Symbol.dispose) WasmFusionEngine.prototype[Symbol.dispose] = WasmFusionEngine.prototype.free;
-exports.WasmFusionEngine = WasmFusionEngine;
 
 /**
  * Fast BBox Intersection-over-Union (IoU) calculation in WASM.
@@ -218,7 +668,7 @@ exports.WasmFusionEngine = WasmFusionEngine;
  * @param {any} box_b
  * @returns {number}
  */
-function calculate_iou(box_a, box_b) {
+export function calculate_iou(box_a, box_b) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         wasm.calculate_iou(retptr, addHeapObject(box_a), addHeapObject(box_b));
@@ -233,13 +683,12 @@ function calculate_iou(box_a, box_b) {
         wasm.__wbindgen_add_to_stack_pointer(16);
     }
 }
-exports.calculate_iou = calculate_iou;
 
 /**
  * Returns the default system configuration as a JavaScript object.
  * @returns {any}
  */
-function get_default_config() {
+export function get_default_config() {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         wasm.get_default_config(retptr);
@@ -254,12 +703,6 @@ function get_default_config() {
         wasm.__wbindgen_add_to_stack_pointer(16);
     }
 }
-exports.get_default_config = get_default_config;
-
-function init() {
-    wasm.init();
-}
-exports.init = init;
 
 /**
  * Fast Non-Maximum Suppression (NMS) in WASM.
@@ -270,7 +713,7 @@ exports.init = init;
  * @param {number} top_k
  * @returns {any}
  */
-function non_max_suppression(candidates_val, iou_threshold, top_k) {
+export function non_max_suppression(candidates_val, iou_threshold, top_k) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         wasm.non_max_suppression(retptr, addHeapObject(candidates_val), iou_threshold, top_k);
@@ -285,7 +728,6 @@ function non_max_suppression(candidates_val, iou_threshold, top_k) {
         wasm.__wbindgen_add_to_stack_pointer(16);
     }
 }
-exports.non_max_suppression = non_max_suppression;
 
 /**
  * Replay a batch of recorded `Signals` through the fusion engine deterministically.
@@ -293,7 +735,7 @@ exports.non_max_suppression = non_max_suppression;
  * @param {string | null} [config_str]
  * @returns {string}
  */
-function replay_signals(signals_json, config_str) {
+export function replay_signals(signals_json, config_str) {
     let deferred4_0;
     let deferred4_1;
     try {
@@ -321,14 +763,23 @@ function replay_signals(signals_json, config_str) {
         wasm.__wbindgen_export4(deferred4_0, deferred4_1, 1);
     }
 }
-exports.replay_signals = replay_signals;
+
+/**
+ * Runs automatically when the module is instantiated.
+ *
+ * Named so it cannot be confused with the loader's own `init` default export,
+ * which is what a caller actually awaits.
+ */
+export function set_panic_hook() {
+    wasm.set_panic_hook();
+}
 
 /**
  * Validate a configuration JSON string. Returns true if valid or throws an error.
  * @param {string} config_json
  * @returns {boolean}
  */
-function validate_config(config_json) {
+export function validate_config(config_json) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
         const ptr0 = passStringToWasm0(config_json, wasm.__wbindgen_export, wasm.__wbindgen_export2);
@@ -345,7 +796,6 @@ function validate_config(config_json) {
         wasm.__wbindgen_add_to_stack_pointer(16);
     }
 }
-exports.validate_config = validate_config;
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
@@ -592,6 +1042,12 @@ function __wbg_get_imports() {
     };
 }
 
+const TensorBagFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_tensorbag_free(ptr, 1));
+const VigiloPipelineFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_vigilopipeline_free(ptr, 1));
 const WasmDirectionTrackerFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_wasmdirectiontracker_free(ptr, 1));
@@ -606,6 +1062,12 @@ function addHeapObject(obj) {
 
     heap[idx] = obj;
     return idx;
+}
+
+function _assertClass(instance, klass) {
+    if (!(instance instanceof klass)) {
+        throw new Error(`expected instance of ${klass.name}`);
+    }
 }
 
 function debugString(val) {
@@ -679,6 +1141,11 @@ function dropObject(idx) {
     heap_next = idx;
 }
 
+function getArrayF32FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getFloat32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
+}
+
 function getArrayU8FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
@@ -690,6 +1157,14 @@ function getDataViewMemory0() {
         cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
     }
     return cachedDataViewMemory0;
+}
+
+let cachedFloat32ArrayMemory0 = null;
+function getFloat32ArrayMemory0() {
+    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
+        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
+    }
+    return cachedFloat32ArrayMemory0;
 }
 
 function getStringFromWasm0(ptr, len) {
@@ -721,6 +1196,20 @@ let heap_next = heap.length;
 
 function isLikeNone(x) {
     return x === undefined || x === null;
+}
+
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1, 1) >>> 0;
+    getUint8ArrayMemory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
+function passArrayF32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getFloat32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
 }
 
 function passStringToWasm0(arg, malloc, realloc) {
@@ -768,7 +1257,15 @@ function takeObject(idx) {
 
 let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 cachedTextDecoder.decode();
+const MAX_SAFARI_DECODE_BYTES = 2146435072;
+let numBytesDecoded = 0;
 function decodeText(ptr, len) {
+    numBytesDecoded += len;
+    if (numBytesDecoded >= MAX_SAFARI_DECODE_BYTES) {
+        cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+        cachedTextDecoder.decode();
+        numBytesDecoded = len;
+    }
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 
@@ -787,9 +1284,101 @@ if (!('encodeInto' in cachedTextEncoder)) {
 
 let WASM_VECTOR_LEN = 0;
 
-const wasmPath = `${__dirname}/vigilo_wasm_bg.wasm`;
-const wasmBytes = require('fs').readFileSync(wasmPath);
-const wasmModule = new WebAssembly.Module(wasmBytes);
-let wasmInstance = new WebAssembly.Instance(wasmModule, __wbg_get_imports());
-let wasm = wasmInstance.exports;
-wasm.__wbindgen_start();
+let wasmModule, wasmInstance, wasm;
+function __wbg_finalize_init(instance, module) {
+    wasmInstance = instance;
+    wasm = instance.exports;
+    wasmModule = module;
+    cachedDataViewMemory0 = null;
+    cachedFloat32ArrayMemory0 = null;
+    cachedUint8ArrayMemory0 = null;
+    wasm.__wbindgen_start();
+    return wasm;
+}
+
+async function __wbg_load(module, imports) {
+    if (typeof Response === 'function' && module instanceof Response) {
+        if (!module.ok) {
+            throw new Error(`failed to fetch Wasm: ${module.status} ${module.statusText} fetching '${module.url}'`);
+        }
+
+        if (typeof WebAssembly.instantiateStreaming === 'function') {
+            try {
+                return await WebAssembly.instantiateStreaming(module, imports);
+            } catch (e) {
+                const validResponse = expectedResponseType(module.type);
+
+                if (validResponse && module.headers.get('Content-Type') !== 'application/wasm') {
+                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve Wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
+
+                } else { throw e; }
+            }
+        }
+
+        const bytes = await module.arrayBuffer();
+        return await WebAssembly.instantiate(bytes, imports);
+    } else {
+        const instance = await WebAssembly.instantiate(module, imports);
+
+        if (instance instanceof WebAssembly.Instance) {
+            return { instance, module };
+        } else {
+            return instance;
+        }
+    }
+
+    function expectedResponseType(type) {
+        switch (type) {
+            case 'basic': case 'cors': case 'default': return true;
+        }
+        return false;
+    }
+}
+
+function initSync(module) {
+    if (wasm !== undefined) return wasm;
+
+
+    if (module !== undefined) {
+        if (Object.getPrototypeOf(module) === Object.prototype) {
+            ({module} = module)
+        } else {
+            console.warn('using deprecated parameters for `initSync()`; pass a single object instead')
+        }
+    }
+
+    const imports = __wbg_get_imports();
+    if (!(module instanceof WebAssembly.Module)) {
+        module = new WebAssembly.Module(module);
+    }
+    const instance = new WebAssembly.Instance(module, imports);
+    return __wbg_finalize_init(instance, module);
+}
+
+async function __wbg_init(module_or_path) {
+    if (wasm !== undefined) return wasm;
+
+
+    if (module_or_path !== undefined) {
+        if (Object.getPrototypeOf(module_or_path) === Object.prototype) {
+            ({module_or_path} = module_or_path)
+        } else {
+            console.warn('using deprecated parameters for the initialization function; pass a single object instead')
+        }
+    }
+
+    if (module_or_path === undefined) {
+        module_or_path = new URL('vigilo_wasm_bg.wasm', import.meta.url);
+    }
+    const imports = __wbg_get_imports();
+
+    if (typeof module_or_path === 'string' || (typeof Request === 'function' && module_or_path instanceof Request) || (typeof URL === 'function' && module_or_path instanceof URL)) {
+        module_or_path = fetch(module_or_path);
+    }
+
+    const { instance, module } = await __wbg_load(await module_or_path, imports);
+
+    return __wbg_finalize_init(instance, module);
+}
+
+export { initSync, __wbg_init as default };

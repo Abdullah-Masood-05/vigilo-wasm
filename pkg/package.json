@@ -1,5 +1,6 @@
 {
   "name": "vigilo-wasm",
+  "type": "module",
   "collaborators": [
     "Abdullah Masood"
   ],
@@ -12,5 +13,8 @@
     "vigilo_wasm.d.ts"
   ],
   "main": "vigilo_wasm.js",
-  "types": "vigilo_wasm.d.ts"
+  "types": "vigilo_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
 }
