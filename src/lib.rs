@@ -5,7 +5,11 @@
 
 use wasm_bindgen::prelude::*;
 
+pub mod decode;
+pub mod frame;
 pub mod models;
+pub mod pipeline;
+pub mod preprocess;
 
 #[path = "../../deepscreen-detect/src/error.rs"]
 pub mod error;
@@ -27,12 +31,50 @@ pub mod report;
 
 use config::Config;
 use direction::DirectionTracker;
+
+pub use pipeline::{TensorBag, VigiloPipeline};
 use fusion::FusionEngine;
 use types::{BBox, Signals};
 
+/// Runs automatically when the module is instantiated.
+///
+/// Named so it cannot be confused with the loader's own `init` default export,
+/// which is what a caller actually awaits.
 #[wasm_bindgen(start)]
-pub fn init() {
+pub fn set_panic_hook() {
     console_error_panic_hook::set_once();
+}
+
+
+/// Serialize to JS with `None` becoming `null`, not `undefined`.
+///
+/// `serde_wasm_bindgen`'s default maps `Option::None` to `undefined`, which
+/// disagrees with `serde_json` — so the same `Signals` reached JS with
+/// `gaze: undefined` live and `gaze: null` when replayed from a recording.
+/// Any consumer that distinguishes them, and `JSON.stringify` does (it drops
+/// `undefined` fields entirely), sees two different shapes for one value.
+pub(crate) fn to_js<T: serde::Serialize + ?Sized>(value: &T) -> Result<JsValue, JsValue> {
+    let serializer = serde_wasm_bindgen::Serializer::new().serialize_missing_as_null(true);
+    value.serialize(&serializer).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Parse a config from TOML or JSON, or fall back to the defaults.
+///
+/// The format is sniffed rather than declared because the same string arrives
+/// from two places that disagree: a `.toml` a proctor edited by hand, and a
+/// JSON blob an admin API served. Requiring the caller to say which would put
+/// the choice one level further from where the mistake is made.
+pub(crate) fn parse_config(config_str: Option<String>) -> Result<Config, JsValue> {
+    let Some(raw) = config_str else {
+        return Ok(Config::default());
+    };
+    if raw.trim_start().starts_with('{') {
+        serde_json::from_str::<Config>(&raw)
+            .map_err(|e| JsValue::from_str(&format!("Invalid config JSON: {e}")))
+    } else {
+        toml::from_str::<Config>(&raw)
+            .map_err(|e| JsValue::from_str(&format!("Invalid config TOML: {e}")))
+    }
 }
 
 /// WebAssembly wrapper for the deterministic temporal `FusionEngine`.
@@ -48,18 +90,7 @@ impl WasmFusionEngine {
     /// If omitted, the default config is used.
     #[wasm_bindgen(constructor)]
     pub fn new(config_str: Option<String>) -> Result<WasmFusionEngine, JsValue> {
-        let cfg = if let Some(raw) = config_str {
-            if raw.trim_start().starts_with('{') {
-                serde_json::from_str::<Config>(&raw)
-                    .map_err(|e| JsValue::from_str(&format!("Invalid config JSON: {e}")))?
-            } else {
-                toml::from_str::<Config>(&raw)
-                    .map_err(|e| JsValue::from_str(&format!("Invalid config TOML: {e}")))?
-            }
-        } else {
-            Config::default()
-        };
-
+        let cfg = parse_config(config_str)?;
         let engine = FusionEngine::new(&cfg);
         Ok(Self { engine, cfg })
     }
@@ -70,8 +101,7 @@ impl WasmFusionEngine {
         let signals: Signals = serde_wasm_bindgen::from_value(signals_val)
             .map_err(|e| JsValue::from_str(&format!("Failed to deserialize Signals: {e}")))?;
         let events = self.engine.step(&signals, t_ms as u64);
-        serde_wasm_bindgen::to_value(&events)
-            .map_err(|e| JsValue::from_str(&format!("Failed to serialize Events: {e}")))
+        to_js(&events)
     }
 
     /// Advance using a JSON string for signals. Returns JSON string of events.
@@ -86,22 +116,19 @@ impl WasmFusionEngine {
     /// Active violation kinds currently raised (deduplicated).
     pub fn active(&self) -> Result<JsValue, JsValue> {
         let kinds = self.engine.active();
-        serde_wasm_bindgen::to_value(&kinds)
-            .map_err(|e| JsValue::from_str(&format!("Failed to serialize active kinds: {e}")))
+        to_js(&kinds)
     }
 
     /// Active violations with subjects for live HUD detail.
     pub fn active_detail(&self) -> Result<JsValue, JsValue> {
         let details = self.engine.active_detail();
-        serde_wasm_bindgen::to_value(&details)
-            .map_err(|e| JsValue::from_str(&format!("Failed to serialize active detail: {e}")))
+        to_js(&details)
     }
 
     /// Finish the session at discrete time `t_ms` and close any open violations.
     pub fn finish(&mut self, t_ms: f64) -> Result<JsValue, JsValue> {
         let events = self.engine.finish(t_ms as u64);
-        serde_wasm_bindgen::to_value(&events)
-            .map_err(|e| JsValue::from_str(&format!("Failed to serialize final events: {e}")))
+        to_js(&events)
     }
 
     /// Reset the fusion engine to clean state with the current config.
@@ -161,8 +188,7 @@ impl WasmDirectionTracker {
         };
 
         let debug_directions = self.tracker.update(head_pose, gaze);
-        serde_wasm_bindgen::to_value(&debug_directions)
-            .map_err(|e| JsValue::from_str(&format!("Failed to serialize directions: {e}")))
+        to_js(&debug_directions)
     }
 }
 
@@ -172,17 +198,7 @@ pub fn replay_signals(signals_json: &str, config_str: Option<String>) -> Result<
     let signals: Vec<Signals> = serde_json::from_str(signals_json)
         .map_err(|e| JsValue::from_str(&format!("Failed to parse Signals array: {e}")))?;
 
-    let cfg = if let Some(raw) = config_str {
-        if raw.trim_start().starts_with('{') {
-            serde_json::from_str::<Config>(&raw)
-                .map_err(|e| JsValue::from_str(&format!("Invalid config JSON: {e}")))?
-        } else {
-            toml::from_str::<Config>(&raw)
-                .map_err(|e| JsValue::from_str(&format!("Invalid config TOML: {e}")))?
-        }
-    } else {
-        Config::default()
-    };
+    let cfg = parse_config(config_str)?;
 
     let events = fusion::replay(&signals, &cfg);
     serde_json::to_string(&events)
@@ -222,16 +238,14 @@ pub fn non_max_suppression(
         (c.class_id, c.bbox, c.score)
     });
 
-    serde_wasm_bindgen::to_value(&kept)
-        .map_err(|e| JsValue::from_str(&format!("Failed to serialize NMS results: {e}")))
+    to_js(&kept)
 }
 
 /// Returns the default system configuration as a JavaScript object.
 #[wasm_bindgen]
 pub fn get_default_config() -> Result<JsValue, JsValue> {
     let cfg = Config::default();
-    serde_wasm_bindgen::to_value(&cfg)
-        .map_err(|e| JsValue::from_str(&format!("Failed to serialize default config: {e}")))
+    to_js(&cfg)
 }
 
 /// Validate a configuration JSON string. Returns true if valid or throws an error.

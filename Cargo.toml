@@ -18,6 +18,8 @@ toml = "0.8"
 thiserror = "2"
 console_error_panic_hook = "0.1"
 getrandom = { version = "0.2", features = ["js"] }
+fast_image_resize = "5"
+js-sys = "0.3"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false
