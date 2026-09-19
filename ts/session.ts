@@ -6,17 +6,7 @@ import type {
   Config,
   DebugDirections,
 } from './types.js';
-
-// We import the WASM module dynamically or statically
-export interface WasmModule {
-  WasmFusionEngine: new (config_str?: string) => any;
-  WasmDirectionTracker: new (enter_deg?: number, exit_deg?: number) => any;
-  replay_signals: (signals_json: string, config_str?: string) => string;
-  calculate_iou: (box_a: any, box_b: any) => number;
-  non_max_suppression: (candidates: any[], iou_threshold: number, top_k: number) => any[];
-  get_default_config: () => Config;
-  validate_config: (config_json: string) => boolean;
-}
+import { vigilo } from './wasm.js';
 
 export type ViolationListener = (violation: Violation) => void;
 export type EventListener = (event: Event) => void;
@@ -28,14 +18,14 @@ export type EventListener = (event: Event) => void;
 export class ProctorSession {
   private engine: any;
   private tracker: any;
-  private wasm: WasmModule;
   private violationStartedListeners: Set<ViolationListener> = new Set();
   private violationEndedListeners: Set<ViolationListener> = new Set();
   private eventListeners: Set<EventListener> = new Set();
   private lastTimestampMs: number = 0;
 
-  constructor(wasm: WasmModule, config?: Config | string) {
-    this.wasm = wasm;
+  /** Requires `initVigilo()` to have been awaited. */
+  constructor(config?: Config | string) {
+    const wasm = vigilo();
     const configStr = typeof config === 'object' ? JSON.stringify(config) : config;
     this.engine = new wasm.WasmFusionEngine(configStr);
     this.tracker = new wasm.WasmDirectionTracker();
@@ -46,7 +36,12 @@ export class ProctorSession {
    * Dispatches events to registered listeners and returns new events.
    */
   public step(signals: Signals, timestampMs?: number): Event[] {
-    const t_ms = timestampMs ?? signals.t_ms ?? Date.now();
+    // `signals.t_ms` is milliseconds since session start. The fallback used to
+    // be `Date.now()`, which is a wall-clock epoch — mixing the two puts a
+    // ~1.7e12 ms jump into the middle of a monotonic timebase, and every hold
+    // timer and decay window downstream reads that as an eternity elapsing
+    // between two consecutive frames.
+    const t_ms = timestampMs ?? signals.t_ms ?? this.lastTimestampMs;
     this.lastTimestampMs = t_ms;
 
     const events: Event[] = this.engine.step(signals, t_ms);

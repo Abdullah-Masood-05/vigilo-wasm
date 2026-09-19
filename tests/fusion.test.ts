@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 import * as wasm from '../pkg/vigilo_wasm.js';
-import { createProctorSession, replay, getDefaultConfig, validateConfig } from '../ts/index.js';
+import { ProctorSession, replay, getDefaultConfig, validateConfig } from '../ts/index.js';
 import type { Signals } from '../ts/types.js';
 
 function createBaseSignal(seq: number, t_ms: number): Signals {
@@ -137,7 +137,7 @@ describe('WasmFusionEngine Full Ruleset', () => {
   });
 
   it('ProctorSession event-driven API should emit callbacks and manage session lifecycle', () => {
-    const session = createProctorSession();
+    const session = new ProctorSession();
     let violationStartedCount = 0;
     let violationEndedCount = 0;
 

@@ -1,0 +1,6 @@
+[test]
+# The wasm module is instantiated once, before any test file runs. With a
+# `--target web` build there is no implicit instantiation to rely on — that is
+# the whole point of the build: the browser gets an explicit await, and so does
+# the test runner.
+preload = ["./tests/setup.ts"]
