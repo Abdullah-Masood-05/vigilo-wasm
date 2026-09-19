@@ -1,0 +1,154 @@
+/* ── Vigilo WASM theme: dark slate with amber / orange-yellow accent. ── */
+
+/* ── Light theme ── */
+:root {
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #f9fafb;
+  --vp-c-bg-soft: #f3f4f6;
+  --vp-c-bg-elv: #ffffff;
+  --vp-c-divider: #e5e7eb;
+  --vp-c-border: #d1d5db;
+  --vp-c-text-1: #111827;
+  --vp-c-text-2: #4b5563;
+  --vp-c-text-3: #9ca3af;
+
+  --vp-c-brand-1: #d97706; /* amber 600 */
+  --vp-c-brand-2: #b45309; /* amber 700 */
+  --vp-c-brand-3: #92400e; /* amber 800 */
+  --vp-c-brand-soft: rgba(217, 119, 6, 0.12);
+
+  --vp-button-brand-bg: #111827;
+  --vp-button-brand-text: #ffffff;
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-hover-bg: #1f2937;
+  --vp-button-brand-hover-text: #ffffff;
+  --vp-button-brand-active-bg: #000000;
+  --vp-button-brand-active-text: #ffffff;
+  --vp-button-alt-bg: var(--vp-c-bg-soft);
+  --vp-button-alt-text: var(--vp-c-text-1);
+  --vp-button-alt-border: var(--vp-c-border);
+  --vp-button-alt-hover-bg: var(--vp-c-bg-elv);
+  --vp-button-alt-hover-border: var(--vp-c-text-3);
+
+  --vp-code-block-bg: #f8fafc;
+  --vp-code-color: var(--vp-c-text-1);
+  --vp-code-bg: #f1f5f9;
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(
+    90deg,
+    #d97706 0%,
+    #f59e0b 50%,
+    #111827 50%
+  );
+  --vp-home-hero-image-background-image: none;
+  --vp-home-hero-image-filter: none;
+}
+
+/* ── Dark theme (default) ── */
+.dark {
+  --vp-c-bg: #0b0d13;
+  --vp-c-bg-alt: #080a0f;
+  --vp-c-bg-soft: #141824;
+  --vp-c-bg-elv: #1c2233;
+  --vp-c-divider: #232a3d;
+  --vp-c-border: #2d364d;
+  --vp-c-text-1: #f3f4f6;
+  --vp-c-text-2: #9ca3af;
+  --vp-c-text-3: #6b7280;
+
+  --vp-c-brand-1: #f59e0b; /* amber 500 */
+  --vp-c-brand-2: #fbbf24; /* amber 400 */
+  --vp-c-brand-3: #d97706; /* amber 600 */
+  --vp-c-brand-soft: rgba(245, 158, 11, 0.16);
+
+  --vp-button-brand-bg: #f59e0b;
+  --vp-button-brand-text: #0b0d13;
+  --vp-button-brand-hover-bg: #fbbf24;
+  --vp-button-brand-hover-text: #0b0d13;
+  --vp-button-brand-active-bg: #d97706;
+  --vp-button-brand-active-text: #0b0d13;
+
+  --vp-code-block-bg: #07090e;
+  --vp-code-color: var(--vp-c-text-1);
+  --vp-code-bg: #141824;
+
+  --vp-home-hero-name-background: linear-gradient(
+    90deg,
+    #f59e0b 0%,
+    #fbbf24 60%,
+    #f3f4f6 60%
+  );
+}
+
+/* Links */
+.vp-doc a {
+  text-decoration: none;
+}
+.vp-doc a:hover {
+  text-decoration: underline;
+}
+
+/* Sidebar active indicator */
+.VPSidebarItem.is-active > .item > .link > .text {
+  color: var(--vp-c-brand-1);
+}
+.VPSidebarItem.level-0.is-active > .item {
+  border-left: 2px solid var(--vp-c-brand-1);
+  padding-left: 8px;
+  margin-left: -10px;
+}
+
+/* Inline code styling */
+.vp-doc :not(pre) > code {
+  color: var(--vp-c-brand-1);
+  background-color: var(--vp-code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+/* Feature cards */
+.VPFeature {
+  border: 1px solid var(--vp-c-border) !important;
+  background-color: var(--vp-c-bg-soft) !important;
+  transition: border-color 0.25s, transform 0.25s;
+}
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1) !important;
+  transform: translateY(-2px);
+}
+
+/* Tables */
+.vp-doc table {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border: 1px solid var(--vp-c-border);
+}
+.vp-doc td {
+  padding: 10px 14px;
+  border: 1px solid var(--vp-c-border);
+}
+.vp-doc tr:nth-child(2n) {
+  background-color: var(--vp-c-bg-alt);
+}
+
+/* ── Mermaid diagram styling ── */
+.mermaid {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}

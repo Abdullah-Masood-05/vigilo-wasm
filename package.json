@@ -1,6 +1,6 @@
 {
   "name": "vigilo-wasm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "In-browser exam proctoring: YuNet, head pose, gaze and prohibited-object detection with onnxruntime-web, fused by the vigilo-core temporal engine compiled to WebAssembly.",
   "type": "module",
   "main": "./dist/index.js",

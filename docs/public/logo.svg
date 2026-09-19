@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="wasmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#654FF0" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+  </defs>
+  <!-- Outer WASM-styled Hexagon -->
+  <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" stroke="url(#wasmGrad)" stroke-width="3" fill="none" opacity="0.85"/>
+  <!-- Inner Shield / Reticle Ring -->
+  <circle cx="50" cy="50" r="30" stroke="url(#amberGrad)" stroke-width="2.5" stroke-dasharray="6 4" opacity="0.9"/>
+  <!-- Targeting Center -->
+  <circle cx="50" cy="50" r="8" fill="url(#amberGrad)"/>
+  <!-- Focus chevrons -->
+  <path d="M 50 24 L 50 34 M 50 66 L 50 76 M 24 50 L 34 50 M 66 50 L 76 50" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Angular Corner Ticks -->
+  <path d="M 33 33 L 40 40 M 67 33 L 60 40 M 33 67 L 40 60 M 67 67 L 60 60" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+</svg>

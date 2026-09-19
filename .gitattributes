@@ -1,0 +1,8 @@
+# Treat generated/build files and docs as vendored/documentation
+# so they do not count toward repository language statistics in GitHub's language bar.
+pkg/** linguist-vendored=true
+dist/** linguist-vendored=true
+docs/** linguist-documentation=true
+docs/** linguist-vendored=true
+demo/** linguist-documentation=true
+*.wasm binary
