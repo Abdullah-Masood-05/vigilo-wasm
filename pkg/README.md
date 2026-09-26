@@ -1,5 +1,7 @@
 # vigilo-wasm
 
+[![Documentation](https://img.shields.io/badge/docs-vigilo--wasm-orange?logo=vitepress)](https://abdullah-masood-05.github.io/vigilo-wasm/)
+[![npm version](https://img.shields.io/npm/v/vigilo-wasm.svg?color=cb3837&logo=npm)](https://www.npmjs.com/package/vigilo-wasm)
 [![Rust](https://img.shields.io/badge/Rust-1.80+-000000?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-wasm--bindgen-654FF0?logo=webassembly&logoColor=white)](https://rustwasm.github.io/wasm-bindgen/)
 [![ONNX Runtime Web](https://img.shields.io/badge/onnxruntime--web-1.30-005CED?logo=onnx&logoColor=white)](https://onnxruntime.ai/docs/tutorials/web/)
@@ -8,6 +10,8 @@
 **Exam proctoring that runs entirely in a browser tab.** Face detection, head
 pose, gaze, prohibited objects and the full temporal fusion engine — no server,
 no upload, no native app. Camera frames never leave the machine.
+
+📖 **[Documentation Website](https://abdullah-masood-05.github.io/vigilo-wasm/)** — guides, architecture, benchmarks, and full API reference.
 
 This is [`vigilo-core`](../deepscreen-detect) ported to the web. The Rust
 engine is the same code, compiled to WebAssembly; only inference and capture
