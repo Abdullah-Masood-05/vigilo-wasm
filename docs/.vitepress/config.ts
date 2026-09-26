@@ -61,9 +61,10 @@ export default withMermaid(
         { text: 'Architecture', link: '/architecture/overview' },
         { text: 'Benchmarks', link: '/benchmarks/performance' },
         {
-          text: 'v1.0.0',
+          text: 'Packages',
           items: [
-            { text: 'npm Package', link: 'https://www.npmjs.com/package/vigilo-wasm' },
+            { text: 'vigilo-wasm (CPU v1.0.2)', link: 'https://www.npmjs.com/package/vigilo-wasm' },
+            { text: 'vigilo-wasm-gpu (WebGPU v1.0.0)', link: 'https://www.npmjs.com/package/vigilo-wasm-gpu' },
             {
               text: 'GitHub Releases',
               link: 'https://github.com/Abdullah-Masood-05/vigilo-wasm/releases',

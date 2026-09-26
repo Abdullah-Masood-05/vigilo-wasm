@@ -73,3 +73,33 @@ Releases all underlying WebAssembly / WebGPU session memory in `onnxruntime-web`
 
 ### `isCrossOriginIsolated(): boolean`
 Returns `true` if `globalThis.crossOriginIsolated` is enabled, indicating that `SharedArrayBuffer` is available for multi-threaded WASM inference.
+
+---
+
+### `hasWebGPU(): Promise<boolean>`
+Detects whether the client browser supports the WebGPU API (`navigator.gpu`) and can successfully initialize a GPU adapter.
+
+```ts
+import { hasWebGPU } from 'vigilo-wasm';
+
+if (await hasWebGPU()) {
+  console.log('WebGPU hardware acceleration available!');
+}
+```
+
+---
+
+### `getGPUAdapterInfo(): Promise<AdapterInfo | null>`
+Inspects active GPU hardware adapter metadata (vendor, architecture, description). Returns `null` if WebGPU is not supported.
+
+```ts
+import { getGPUAdapterInfo } from 'vigilo-wasm';
+
+const info = await getGPUAdapterInfo();
+console.log(info?.vendor, info?.architecture);
+```
+
+---
+
+### `getExecutionProviders(preferGpu?: boolean): Promise<string[]>`
+Returns the recommended execution provider list for the current environment. Returns `['webgpu', 'wasm']` if WebGPU is available, else `['wasm']`.

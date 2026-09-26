@@ -57,26 +57,39 @@ Subsequent loads fetch instantly from local disk storage without any network req
 
 ---
 
-## WebGPU Acceleration
+## WebGPU Hardware Acceleration
 
-Where available, WebGPU drastically reduces latency, especially for the heavy 448×448 gaze model:
+Where available, WebGPU drastically reduces neural inference latency, especially for the heavy 448×448 gaze model:
 
 ```ts
-import { hasWebGPU, getGPUAdapterInfo, loadModels } from 'vigilo-wasm';
+import { loadModels } from 'vigilo-wasm'; // Or 'vigilo-wasm-gpu'
 
-// Check GPU availability
-if (await hasWebGPU()) {
-  const info = await getGPUAdapterInfo();
-  console.log(`WebGPU active on ${info?.vendor || 'hardware GPU'}`);
-}
-
-// Load models with WebGPU acceleration (with automatic CPU fallback)
 const models = await loadModels(urls, {
   executionProviders: ['webgpu', 'wasm'],
 });
 ```
 
-On the **`gpu` branch**, `loadModels` defaults to `['webgpu', 'wasm']` automatically. If a device lacks WebGPU support or encounters a shader compile error, it automatically falls back to WASM SIMD.
+### Automatic WebGPU in `vigilo-wasm-gpu`
+
+If using the **`vigilo-wasm-gpu`** package (from the `gpu` branch), `loadModels` prioritizes `['webgpu', 'wasm']` by default:
+
+* **Hardware GPU Active**: Models compile directly to WebGPU WGSL compute shaders on the client's GPU (NVIDIA, AMD, Intel, Apple Silicon).
+* **Automatic Fallback**: If a client device or browser (e.g. older Safari or Firefox) does not support WebGPU, it seamlessly falls back to multi-threaded WASM SIMD without throwing errors or breaking the exam session.
+
+### Detecting WebGPU in the Browser
+
+You can detect whether the current browser session has access to a hardware GPU:
+
+```ts
+import { hasWebGPU, getGPUAdapterInfo } from 'vigilo-wasm-gpu';
+
+if (await hasWebGPU()) {
+  const adapter = await getGPUAdapterInfo();
+  console.log(`WebGPU active: ${adapter?.vendor} (${adapter?.architecture})`);
+} else {
+  console.log('Falling back to CPU WebAssembly SIMD.');
+}
+```
 
 ---
 
