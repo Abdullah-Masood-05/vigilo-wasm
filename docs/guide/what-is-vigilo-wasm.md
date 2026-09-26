@@ -5,36 +5,29 @@
 It ports the battle-tested Rust [`vigilo-core`](https://github.com/Abdullah-Masood-05/vigilo-core) temporal fusion engine to WebAssembly, combining it with [`onnxruntime-web`](https://onnxruntime.ai/docs/tutorials/web/) to perform real-time face detection, head pose estimation, gaze tracking, and prohibited object detection with zero server dependencies.
 
 ```mermaid
-graph TD
-    subgraph Browser ["Client Browser Tab — Zero Network Leakage"]
-        Cam["getUserMedia<br/>1280x720"] --> Canvas["Canvas 2D<br/>willReadFrequently"]
-        Canvas --> RGBA["RGBA Byte Buffer"]
-
-        subgraph WASM1 ["vigilo-wasm"]
-            Pre["Letterbox, Crop<br/>+ NCHW Pack"]
-        end
-
-        RGBA --> Pre
-        Pre --> Tensor["Float32Array Tensors"]
-
-        subgraph ORT ["onnxruntime-web"]
-            Inference["Neural Inference<br/>WebGPU / SIMD"]
-        end
-
-        Tensor --> Inference
-        Inference --> Out["Raw Output Tensors"]
-
-        subgraph WASM2 ["vigilo-wasm"]
-            Post["Anchor Decode,<br/>Keypoints + NMS"]
-            Gate["Gaze Gating Logic"]
-            Fusion["Temporal Fusion Engine"]
-        end
-
-        Out --> Post
-        Post --> Gate
-        Gate --> Fusion
-        Fusion --> Events["Violation Events<br/>+ Signals"]
+flowchart LR
+    subgraph Capture ["Browser Capture"]
+        direction TB
+        Cam["getUserMedia (1280x720)"] --> Canvas["Canvas 2D"] --> RGBA["RGBA Pixels"]
     end
+
+    subgraph Preprocess ["vigilo-wasm (Rust)"]
+        Pre["Letterbox, Crop & NCHW Pack"]
+    end
+
+    subgraph Inference ["onnxruntime-web"]
+        ModelRun["Neural Inference (WebGPU / SIMD)"]
+    end
+
+    subgraph Fusion ["vigilo-wasm (Rust)"]
+        direction TB
+        Decode["Anchor Decode & NMS"] --> Gate["Gaze Gating"] --> Temporal["Temporal Fusion Engine"]
+    end
+
+    RGBA --> Pre
+    Pre -->|"Float32Array"| ModelRun
+    ModelRun -->|"Output Tensors"| Decode
+    Temporal --> Events["Violation Events"]
 ```
 
 ---

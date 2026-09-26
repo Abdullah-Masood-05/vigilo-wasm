@@ -20,29 +20,24 @@ Previous iterations of WASM packages often relied on `--target bundler`. That ap
 Transferring large image buffers between JavaScript and WebAssembly can easily become a major performance bottleneck if done carelessly.
 
 ```mermaid
-graph TD
+flowchart LR
     subgraph JS ["JavaScript / DOM"]
-        Video["HTMLVideoElement"]
-        Canvas["Canvas 2D<br/>willReadFrequently"]
-        RGBA["ImageData<br/>Uint8ClampedArray"]
-        Video --> Canvas --> RGBA
+        direction TB
+        Video["Video Capture"] --> Canvas["Canvas 2D"] --> RGBA["RGBA Bytes"]
     end
 
     subgraph WASM ["Rust / WebAssembly"]
-        Buffer["Scratch Frame Buffer"]
-        Pre["Letterbox + NCHW Pack"]
-        OutTensor["Float32Array<br/>Input Tensor"]
-        Buffer --> Pre --> OutTensor
+        direction TB
+        Buffer["Scratch Frame Buffer"] --> Pre["Letterbox & NCHW Pack"] --> OutTensor["Float32Array Tensor"]
     end
 
     subgraph ORT ["onnxruntime-web"]
-        GpuBuff["GPU Tensor Buffer"]
-        Kernel["Neural Inference<br/>WebGPU / SIMD"]
-        GpuBuff --> Kernel
+        direction TB
+        GpuBuff["GPU Tensor Buffer"] --> Kernel["Neural Inference (WebGPU / SIMD)"]
     end
 
-    RGBA -- "Uint8Array view" --> Buffer
-    OutTensor -- "zero-copy view" --> GpuBuff
+    RGBA -->|"Uint8Array view"| Buffer
+    OutTensor -->|"zero-copy view"| GpuBuff
 ```
 
 1. **Camera to WASM**: `camera.grab()` provides an `ImageData` buffer. `pipeline.beginFrame()` receives a `Uint8Array` view pointing directly at this memory.
