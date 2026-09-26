@@ -5,6 +5,7 @@ export const __wbg_tensorbag_free: (a: number, b: number) => void;
 export const __wbg_vigilopipeline_free: (a: number, b: number) => void;
 export const __wbg_wasmdirectiontracker_free: (a: number, b: number) => void;
 export const __wbg_wasmfusionengine_free: (a: number, b: number) => void;
+export const build_target: (a: number) => void;
 export const calculate_iou: (a: number, b: number, c: number) => void;
 export const get_default_config: (a: number) => void;
 export const non_max_suppression: (a: number, b: number, c: number, d: number) => void;

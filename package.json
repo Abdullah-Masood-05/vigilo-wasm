@@ -1,7 +1,7 @@
 {
   "name": "vigilo-wasm",
   "version": "1.0.1",
-  "description": "In-browser exam proctoring: YuNet, head pose, gaze and prohibited-object detection with onnxruntime-web, fused by the vigilo-core temporal engine compiled to WebAssembly.",
+  "description": "High-performance GPU-accelerated in-browser exam proctoring: YuNet, head pose, gaze and prohibited-object detection with onnxruntime-web (WebGPU), fused by the vigilo-core temporal engine compiled to WebAssembly.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -39,6 +39,9 @@
     "proctoring",
     "exam-integrity",
     "browser",
+    "webgpu",
+    "gpu",
+    "hardware-acceleration",
     "webassembly",
     "wasm",
     "onnxruntime-web",

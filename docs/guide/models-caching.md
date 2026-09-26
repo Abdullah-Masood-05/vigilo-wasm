@@ -62,12 +62,21 @@ Subsequent loads fetch instantly from local disk storage without any network req
 Where available, WebGPU drastically reduces latency, especially for the heavy 448×448 gaze model:
 
 ```ts
+import { hasWebGPU, getGPUAdapterInfo, loadModels } from 'vigilo-wasm';
+
+// Check GPU availability
+if (await hasWebGPU()) {
+  const info = await getGPUAdapterInfo();
+  console.log(`WebGPU active on ${info?.vendor || 'hardware GPU'}`);
+}
+
+// Load models with WebGPU acceleration (with automatic CPU fallback)
 const models = await loadModels(urls, {
   executionProviders: ['webgpu', 'wasm'],
 });
 ```
 
-When configured with `['webgpu', 'wasm']`, `onnxruntime-web` attempts to initialize each model on the GPU via WebGPU. If a device lacks WebGPU support or encounters a shader compile error, it automatically falls back to WASM SIMD.
+On the **`gpu` branch**, `loadModels` defaults to `['webgpu', 'wasm']` automatically. If a device lacks WebGPU support or encounters a shader compile error, it automatically falls back to WASM SIMD.
 
 ---
 

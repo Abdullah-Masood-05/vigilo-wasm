@@ -44,6 +44,9 @@ export {
   releaseModels,
   fetchModel,
   isCrossOriginIsolated,
+  hasWebGPU,
+  getGPUAdapterInfo,
+  getExecutionProviders,
 } from './browser/models.js';
 export type {
   ModelUrls,

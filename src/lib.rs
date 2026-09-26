@@ -45,6 +45,19 @@ pub fn set_panic_hook() {
     console_error_panic_hook::set_once();
 }
 
+/// Returns the engine build profile ("gpu" or "cpu").
+#[wasm_bindgen]
+pub fn build_target() -> String {
+    #[cfg(feature = "gpu")]
+    {
+        "gpu".to_string()
+    }
+    #[cfg(not(feature = "gpu"))]
+    {
+        "cpu".to_string()
+    }
+}
+
 
 /// Serialize to JS with `None` becoming `null`, not `undefined`.
 ///

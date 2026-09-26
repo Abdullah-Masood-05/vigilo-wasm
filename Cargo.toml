@@ -9,6 +9,11 @@ authors = ["Abdullah Masood"]
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = ["gpu"]
+gpu = []
+cpu = []
+
 [dependencies]
 wasm-bindgen = "0.2"
 serde = { version = "1", features = ["derive"] }

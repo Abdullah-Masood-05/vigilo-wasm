@@ -187,6 +187,11 @@ export class WasmFusionEngine {
 }
 
 /**
+ * Returns the engine build profile ("gpu" or "cpu").
+ */
+export function build_target(): string;
+
+/**
  * Fast BBox Intersection-over-Union (IoU) calculation in WASM.
  */
 export function calculate_iou(box_a: any, box_b: any): number;
@@ -229,6 +234,7 @@ export interface InitOutput {
     readonly __wbg_vigilopipeline_free: (a: number, b: number) => void;
     readonly __wbg_wasmdirectiontracker_free: (a: number, b: number) => void;
     readonly __wbg_wasmfusionengine_free: (a: number, b: number) => void;
+    readonly build_target: (a: number) => void;
     readonly calculate_iou: (a: number, b: number, c: number) => void;
     readonly get_default_config: (a: number) => void;
     readonly non_max_suppression: (a: number, b: number, c: number, d: number) => void;

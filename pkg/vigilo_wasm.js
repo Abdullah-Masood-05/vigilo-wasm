@@ -663,6 +663,27 @@ export class WasmFusionEngine {
 if (Symbol.dispose) WasmFusionEngine.prototype[Symbol.dispose] = WasmFusionEngine.prototype.free;
 
 /**
+ * Returns the engine build profile ("gpu" or "cpu").
+ * @returns {string}
+ */
+export function build_target() {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        wasm.build_target(retptr);
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+        deferred1_0 = r0;
+        deferred1_1 = r1;
+        return getStringFromWasm0(r0, r1);
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+        wasm.__wbindgen_export4(deferred1_0, deferred1_1, 1);
+    }
+}
+
+/**
  * Fast BBox Intersection-over-Union (IoU) calculation in WASM.
  * @param {any} box_a
  * @param {any} box_b
