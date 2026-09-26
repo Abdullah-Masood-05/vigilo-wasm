@@ -1,7 +1,7 @@
-# vigilo-wasm
+# vigilo-wasm-gpu
 
 [![Documentation](https://img.shields.io/badge/docs-vigilo--wasm-orange?logo=vitepress)](https://abdullah-masood-05.github.io/vigilo-wasm/)
-[![npm version](https://img.shields.io/npm/v/vigilo-wasm.svg?color=cb3837&logo=npm)](https://www.npmjs.com/package/vigilo-wasm)
+[![npm version](https://img.shields.io/npm/v/vigilo-wasm-gpu.svg?color=cb3837&logo=npm)](https://www.npmjs.com/package/vigilo-wasm-gpu)
 [![WebGPU](https://img.shields.io/badge/WebGPU-hardware--accelerated-00C7B7?logo=webgpu&logoColor=white)](https://onnxruntime.ai/docs/tutorials/web/webgpu-setup.html)
 [![Rust](https://img.shields.io/badge/Rust-1.80+-000000?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-wasm--bindgen-654FF0?logo=webassembly&logoColor=white)](https://rustwasm.github.io/wasm-bindgen/)
