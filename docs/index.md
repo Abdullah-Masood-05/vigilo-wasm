@@ -44,21 +44,30 @@ features:
 
 ## Quick installation
 
-::: code-group
-```bash [npm]
-npm install vigilo-wasm
-```
+Choose between the CPU build (WASM SIMD) or GPU build (WebGPU hardware acceleration):
 
-```bash [bun]
+::: code-group
+```bash [bun (CPU)]
 bun add vigilo-wasm
 ```
 
-```bash [pnpm]
-pnpm add vigilo-wasm
+```bash [bun (GPU)]
+bun add vigilo-wasm-gpu
 ```
 
-```bash [yarn]
-yarn add vigilo-wasm
+```bash [npm (CPU)]
+npm install vigilo-wasm
+```
+
+```bash [npm (GPU)]
+npm install vigilo-wasm-gpu
+```
+
+```bash [pnpm]
+# CPU build
+pnpm add vigilo-wasm
+# GPU build
+pnpm add vigilo-wasm-gpu
 ```
 :::
 

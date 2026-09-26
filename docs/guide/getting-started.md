@@ -4,30 +4,37 @@ Get started with **vigilo-wasm** in your web application.
 
 ---
 
-## 1. Installation
+## 1. Choosing Your Package: CPU vs GPU
 
-Install `vigilo-wasm` and its peer dependency `onnxruntime-web`:
+Vigilo is maintained across two builds tailored for different client constraints:
+
+| Package | Branch | Primary Target | Acceleration Backend |
+|---|---|---|---|
+| **`vigilo-wasm`** | `main` | Standard web, headless runtimes, CPU-only nodes | Multi-threaded WASM SIMD |
+| **`vigilo-wasm-gpu`** | `gpu` | High-performance client browsers | **WebGPU** (hardware GPU) with WASM fallback |
+
+### Installation
+
+Install your preferred package alongside `onnxruntime-web`:
 
 ::: code-group
-```bash [npm]
+```bash [CPU Build (vigilo-wasm)]
+# Recommended for standard web apps and compatibility
+bun add vigilo-wasm onnxruntime-web@^1.20.0
+# Or npm:
 npm install vigilo-wasm onnxruntime-web@^1.20.0
 ```
 
-```bash [bun]
-bun add vigilo-wasm onnxruntime-web@^1.20.0
-```
-
-```bash [pnpm]
-pnpm add vigilo-wasm onnxruntime-web@^1.20.0
-```
-
-```bash [yarn]
-yarn add vigilo-wasm onnxruntime-web@^1.20.0
+```bash [GPU Build (vigilo-wasm-gpu)]
+# Recommended for maximum framerates via WebGPU
+bun add vigilo-wasm-gpu onnxruntime-web@^1.20.0
+# Or npm:
+npm install vigilo-wasm-gpu onnxruntime-web@^1.20.0
 ```
 :::
 
 > [!NOTE]
-> `onnxruntime-web` is declared as an optional peer dependency. You can import it via your bundler, or provide a CDN-loaded global instance directly to `VigiloBrowser`.
+> `onnxruntime-web` is declared as an optional peer dependency. You can import it via your bundler, or provide a CDN-loaded global instance directly to `VigiloBrowser`. Both packages export the same unified TypeScript API.
 
 ---
 
