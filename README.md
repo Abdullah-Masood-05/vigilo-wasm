@@ -6,6 +6,9 @@
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-wasm--bindgen-654FF0?logo=webassembly&logoColor=white)](https://rustwasm.github.io/wasm-bindgen/)
 [![ONNX Runtime Web](https://img.shields.io/badge/onnxruntime--web-1.30-005CED?logo=onnx&logoColor=white)](https://onnxruntime.ai/docs/tutorials/web/)
 [![Licence](https://img.shields.io/badge/licence-AGPL--3.0-blue)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Abdullah-Masood-05/vigilo-wasm?style=social&logo=github)](https://github.com/Abdullah-Masood-05/vigilo-wasm/stargazers)
+
+> ⭐ **Enjoying vigilo-wasm?** If it's useful to you, please [star it on GitHub](https://github.com/Abdullah-Masood-05/vigilo-wasm). It's free and it helps other developers find it.
 
 **Exam proctoring that runs entirely in a browser tab.** Face detection, head
 pose, gaze, prohibited objects and the full temporal fusion engine — no server,
